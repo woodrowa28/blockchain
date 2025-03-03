@@ -65,6 +65,7 @@ public class BlockChain {
         }
         last.next = new Node(blk);
         last = last.next;
+        numBlocks++;
     }
     
     /**
@@ -106,6 +107,7 @@ public class BlockChain {
             if (annaBalance < 0 || bobBalance < 0) {
                 return false;
             }
+            curr = curr.next;
         }
         return true;
     }
@@ -134,6 +136,8 @@ public class BlockChain {
         Node curr = first;
         while (curr != null) {
             ret.append(curr.block.toString());
+            ret.append("\n");
+            curr = curr.next;
         }
         return ret.toString();
     }

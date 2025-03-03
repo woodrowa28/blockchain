@@ -64,7 +64,7 @@ public class Block {
         do {
             nonce++;
             newHash = createHash();
-        } while (!currHash.isValid());
+        } while (!newHash.isValid());
         return newHash;
     }
     
