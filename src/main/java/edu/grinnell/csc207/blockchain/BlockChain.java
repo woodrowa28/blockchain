@@ -13,29 +13,8 @@ public class BlockChain {
         
         private Node next;
         
-        /**
-         * Creates a new Node with information to make a block (unknown nonce).
-         * @param numBlocks number of blocks in list (location of block to create)
-         * @param data transfer amount held by block
-         * @param prevHash hash of previous block in list
-         * @throws NoSuchAlgorithmException upon hashing failure
-         */
-        public Node(int numBlocks, int data, Hash prevHash) throws NoSuchAlgorithmException {
-            block = new Block(numBlocks, data, prevHash);
-            next = null;
-        }
-        
-        /**
-         * Creates a new Node with information to make a block (known nonce).
-         * @param numBlocks number of blocks in list (location of block to create)
-         * @param data transfer amount held by block
-         * @param prevHash hash of previous block in list
-         * @param nonce unique number for hashing
-         * @throws NoSuchAlgorithmException upon hashing failure
-         */
-        public Node(int numBlocks, int data, Hash prevHash, long nonce) 
-               throws NoSuchAlgorithmException {
-            block = new Block(numBlocks, data, prevHash, nonce);
+        public Node(Block b) {
+            block = b;
             next = null;
         }
     }
@@ -52,7 +31,7 @@ public class BlockChain {
      * @throws NoSuchAlgorithmException upon hashing failure
      */
     public BlockChain(int initial) throws NoSuchAlgorithmException {
-        first = new Node(0, initial, null);
+        first = new Node(new Block(0, initial, null));
         last = first;
         numBlocks = 1;
     }
@@ -64,7 +43,7 @@ public class BlockChain {
      * @throws NoSuchAlgorithmException upon hashing failure
      */
     public Block mine(int amount) throws NoSuchAlgorithmException {
-        
+        return new Block(numBlocks, amount, getHash());
     }
     
     /**
@@ -72,7 +51,7 @@ public class BlockChain {
      * @return numBlocks
      */
     public int getSize() {
-        
+        return numBlocks;
     }
     
     /**
@@ -81,7 +60,11 @@ public class BlockChain {
      * @throws IllegalArgumentException if block is incompatible with rest of chain
      */
     public void append(Block blk) throws IllegalArgumentException {
-        
+        if (!blk.getHash().isValid()) {
+            throw new IllegalArgumentException("Block is invalid and cannot be added.");
+        }
+        last.next = new Node(blk);
+        last = last.next;
     }
     
     /**
@@ -89,7 +72,16 @@ public class BlockChain {
      * @return whether or not successfully removed
      */
     public boolean removeLast() {
-        
+        if (numBlocks == 1) {
+            return false;
+        } else {
+            Node curr = first;
+            while (curr.next.next != null) {
+                curr = curr.next;
+            }
+            last = curr;
+            return true;
+        }
     }
     
     /**
@@ -97,7 +89,7 @@ public class BlockChain {
      * @return hash (object) of last block
      */
     public Hash getHash() {
-        
+        return last.block.getHash();
     }
     
     /**
@@ -105,14 +97,31 @@ public class BlockChain {
      * @return validity of chain
      */
     public boolean isValidBlockChain() {
-        
+        int annaBalance = first.block.getNum();
+        int bobBalance = 0;
+        Node curr = first.next;
+        while (curr != null) {
+            annaBalance += curr.block.getAmount();
+            bobBalance -= curr.block.getAmount();
+            if (annaBalance < 0 || bobBalance < 0) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
      * Prints the balances of Alice and Bob based on the transactions recorded in the blocks.
      */
     public void printBalances() {
-        
+        int annaBalance = first.block.getNum();
+        int bobBalance = 0;
+        Node curr = first.next;
+        while (curr != null) {
+            annaBalance += curr.block.getAmount();
+            bobBalance -= curr.block.getAmount();
+        }
+        System.out.println("Anna: " + annaBalance + ", Bob: " + bobBalance);
     }
     
     /**
@@ -121,6 +130,11 @@ public class BlockChain {
      */
     @Override
     public String toString() {
-        
+        StringBuilder ret = new StringBuilder();
+        Node curr = first;
+        while (curr != null) {
+            ret.append(curr.block.toString());
+        }
+        return ret.toString();
     }
 }
