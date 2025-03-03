@@ -81,6 +81,8 @@ public class BlockChain {
                 curr = curr.next;
             }
             last = curr;
+            last.next = null;
+            numBlocks--;
             return true;
         }
     }
@@ -98,7 +100,7 @@ public class BlockChain {
      * @return validity of chain
      */
     public boolean isValidBlockChain() {
-        int annaBalance = first.block.getNum();
+        int annaBalance = first.block.getAmount();
         int bobBalance = 0;
         Node curr = first.next;
         while (curr != null) {
@@ -116,12 +118,13 @@ public class BlockChain {
      * Prints the balances of Alice and Bob based on the transactions recorded in the blocks.
      */
     public void printBalances() {
-        int annaBalance = first.block.getNum();
+        int annaBalance = first.block.getAmount();
         int bobBalance = 0;
         Node curr = first.next;
         while (curr != null) {
             annaBalance += curr.block.getAmount();
             bobBalance -= curr.block.getAmount();
+            curr = curr.next;
         }
         System.out.println("Anna: " + annaBalance + ", Bob: " + bobBalance);
     }
